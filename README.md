@@ -230,8 +230,8 @@ Cada registro incluye: usuario, acción, entidad afectada, IP del cliente y time
 
 La aplicación está desplegada en:
 
-- **Frontend:** [Vercel](https://wallet-app-chrisvalero.vercel.app) — React SPA con build automático
-- **Backend:** [Render](https://wallet-backend-xxx.onrender.com) — FastAPI web service
+- **Frontend:** [Vercel](https://wallet-app-frontend-beta.vercel.app) — React SPA con build automático
+- **Backend:** [Render](https://wallet-app-backend-bbbt.onrender.com) — FastAPI web service
 
 ### CI/CD
 
