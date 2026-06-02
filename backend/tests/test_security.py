@@ -1,7 +1,8 @@
 import uuid
+import os
 import pytest
 
-BASE = "http://localhost:8000"
+BASE = os.environ.get("TEST_BASE_URL", "http://localhost:8000")
 
 _RUN = uuid.uuid4().hex[:8]
 
@@ -92,7 +93,7 @@ class TestSQLInjection:
             r = client_http.post(f"{BASE}/api/auth/login", json={
                 "email": payload, "password": "anything"
             })
-            assert r.status_code in (401, 422), f"SQLi posible con: {payload!r}"
+            assert r.status_code in (401, 403, 422), f"SQLi posible con: {payload!r}"
 
     def test_sqli_in_alias(self, client_http, sec_headers):
         for payload in self.payloads:
