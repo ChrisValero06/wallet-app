@@ -1,7 +1,6 @@
 import math
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from app.core.database import get_db
 from app.models.payment_method import PaymentMethod
 from app.models.user import User
@@ -66,7 +65,7 @@ def list_payment_methods(
 
     q = db.query(PaymentMethod).filter(
         PaymentMethod.user_id == current_user.id,
-        PaymentMethod.is_deleted == False,
+        PaymentMethod.is_deleted.is_(False),
     )
     if status_filter:
         q = q.filter(PaymentMethod.status == status_filter)
@@ -98,7 +97,7 @@ def create_payment_method(
         PaymentMethod.user_id == current_user.id,
         PaymentMethod.type == body.type,
         PaymentMethod.identifier_hash == id_hash,
-        PaymentMethod.is_deleted == False,
+        PaymentMethod.is_deleted.is_(False),
     ).first()
     if existing:
         audit_service.log(
@@ -107,7 +106,10 @@ def create_payment_method(
             metadata={"type": body.type, "alias": body.alias},
             ip_address=_client_ip(request),
         )
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Ya existe un método de pago con ese identificador")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un método de pago con ese identificador",
+        )
 
     clean = body.identifier.strip()
     pm = PaymentMethod(
