@@ -57,14 +57,12 @@ def test_delete_payment_method(client, auth_headers):
     assert resp.status_code == 200
     assert resp.json()["status"] == "inactive"
 
-    # Should not appear in list anymore
     list_resp = client.get("/api/payment-methods", headers=auth_headers)
     ids = [pm["id"] for pm in list_resp.json()["items"]]
     assert pm_id not in ids
 
 
 def test_access_other_users_payment_method(client):
-    # Register second user
     client.post("/api/auth/register", json={
         "email": "otro@example.com", "full_name": "Otro", "password": "password123"
     })
@@ -73,13 +71,11 @@ def test_access_other_users_payment_method(client):
     })
     other_headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
 
-    # Create PM with other user
     create_resp = client.post("/api/payment-methods", json={
         **PM_PAYLOAD, "identifier": "4111111111110001", "alias": "PM Otro"
     }, headers=other_headers)
     pm_id = create_resp.json()["id"]
 
-    # Register first user and try to access other's PM
     client.post("/api/auth/register", json={
         "email": "primero@example.com", "full_name": "Primero", "password": "password123"
     })

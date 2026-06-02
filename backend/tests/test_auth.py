@@ -56,7 +56,6 @@ def test_login_unknown_email(client):
 def test_logout(client, auth_headers):
     resp = client.post("/api/auth/logout", headers=auth_headers)
     assert resp.status_code == 200
-    # Token should be invalid now
     resp2 = client.get("/api/users/me", headers=auth_headers)
     assert resp2.status_code == 401
 

@@ -14,14 +14,14 @@ class PaymentMethod(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
-    type: Mapped[str] = mapped_column(String(20), nullable=False)          # card | bank_account | clabe | other
+    type: Mapped[str] = mapped_column(String(20), nullable=False)
     alias: Mapped[str] = mapped_column(String(100), nullable=False)
     institution: Mapped[str] = mapped_column(String(100), nullable=False)
-    currency: Mapped[str] = mapped_column(String(3), nullable=False)       # MXN, USD, …
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
     identifier_encrypted: Mapped[str] = mapped_column(String(512), nullable=False)
-    identifier_hash: Mapped[str] = mapped_column(String(64), nullable=False)  # SHA-256 for duplicate check
+    identifier_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     identifier_last4: Mapped[str] = mapped_column(String(4), nullable=False)
-    status: Mapped[str] = mapped_column(String(10), default="active", nullable=False)  # active | inactive
+    status: Mapped[str] = mapped_column(String(10), default="active", nullable=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

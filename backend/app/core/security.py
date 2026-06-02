@@ -5,7 +5,6 @@ import bcrypt
 from jose import JWTError, jwt
 from app.core.config import settings
 
-# In-memory token blacklist for logout invalidation
 _token_blacklist: set[str] = set()
 
 

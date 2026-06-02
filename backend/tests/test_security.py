@@ -1,14 +1,8 @@
-"""
-Pruebas de seguridad — verifican que la app resiste ataques comunes.
-Requiere el servidor corriendo: uvicorn app.main:app --reload
-Ejecutar con: pytest tests/test_security.py -v
-"""
 import uuid
 import pytest
 
 BASE = "http://localhost:8000"
 
-# Prefijo único por ejecución para evitar colisiones con datos previos en wallet.db
 _RUN = uuid.uuid4().hex[:8]
 
 
@@ -21,7 +15,7 @@ def email(tag="user"):
 
 
 def card():
-    return f"4111{uid()}"  # 16 dígitos únicos
+    return f"4111{uid()}"
 
 
 def register_and_login(client, em=None, password="Password123"):
@@ -41,7 +35,6 @@ def make_pm(client, headers, identifier=None, alias="Test"):
     })
 
 
-# ─── 0. XSS ──────────────────────────────────────────────────────────────────
 
 class TestXSS:
     xss_payloads = [
@@ -53,14 +46,11 @@ class TestXSS:
     ]
 
     def test_xss_in_alias_stored_as_plain_text(self, client_http, sec_headers):
-        """El backend guarda el texto tal cual; el frontend (React JSX) lo escapa al renderizar."""
         for payload in self.xss_payloads:
             r = make_pm(client_http, sec_headers, alias=payload)
-            # Debe crearse sin error 500 — el ORM lo trata como string normal
             assert r.status_code in (201, 409), f"Error inesperado con XSS en alias: {r.status_code}"
             if r.status_code == 201:
                 data = r.json()
-                # La API devuelve el texto plano en JSON — React lo escapa al renderizar
                 assert data["alias"] == payload, "El backend alteró el alias inesperadamente"
 
     def test_xss_in_institution_stored_as_plain_text(self, client_http, sec_headers):
@@ -80,16 +70,13 @@ class TestXSS:
                 "password": "Password123",
             })
             assert r.status_code == 201
-            # El nombre se devuelve como texto plano en JSON, React lo escapa
             assert r.json()["full_name"] == payload
 
     def test_content_type_is_json_not_html(self, client_http):
-        """La API siempre responde JSON, nunca HTML — elimina vectores de XSS reflejado."""
         r = client_http.get(f"{BASE}/api/users/me")
         assert "application/json" in r.headers.get("content-type", "")
 
 
-# ─── 1. SQL Injection ─────────────────────────────────────────────────────────
 
 class TestSQLInjection:
     payloads = [
@@ -113,7 +100,6 @@ class TestSQLInjection:
             assert r.status_code != 500, f"Error 500 con SQLi en alias: {payload!r}"
 
 
-# ─── 2. Datos sensibles nunca expuestos ───────────────────────────────────────
 
 class TestSensitiveDataExposure:
 
@@ -148,7 +134,6 @@ class TestSensitiveDataExposure:
         assert c not in r.text
 
 
-# ─── 3. JWT — tokens manipulados ─────────────────────────────────────────────
 
 class TestJWTSecurity:
 
@@ -203,7 +188,6 @@ class TestJWTSecurity:
         assert r2.status_code == 401, "Token sigue válido tras logout"
 
 
-# ─── 4. IDOR — acceso a recursos de otros usuarios ───────────────────────────
 
 class TestIDOR:
 
@@ -234,7 +218,6 @@ class TestIDOR:
         assert r.json()["total"] == 0, "Usuario B ve PMs de usuario A"
 
 
-# ─── 5. Mass Assignment ───────────────────────────────────────────────────────
 
 class TestMassAssignment:
 
@@ -262,7 +245,6 @@ class TestMassAssignment:
         assert r.json()["status"] == "active"
 
 
-# ─── 6. Duplicados ───────────────────────────────────────────────────────────
 
 class TestDuplicates:
 
@@ -281,7 +263,6 @@ class TestDuplicates:
         assert r2.status_code == 409
 
 
-# ─── 7. Validación de inputs ─────────────────────────────────────────────────
 
 class TestInputValidation:
 
@@ -321,7 +302,6 @@ class TestInputValidation:
         assert r.status_code == 422
 
 
-# ─── fixtures ────────────────────────────────────────────────────────────────
 
 @pytest.fixture(scope="module")
 def client_http():

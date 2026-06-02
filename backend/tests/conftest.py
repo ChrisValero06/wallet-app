@@ -1,7 +1,6 @@
 import os
 from cryptography.fernet import Fernet
 
-# Set test env vars BEFORE any app imports
 _fernet_key = Fernet.generate_key().decode()
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 os.environ["SECRET_KEY"] = "test-secret-key-for-pytest"
@@ -16,7 +15,6 @@ from sqlalchemy.pool import StaticPool
 from app.core.database import Base, get_db
 from app.main import app
 
-# StaticPool forces a single shared connection — required for SQLite in-memory tests
 engine = create_engine(
     "sqlite:///:memory:",
     connect_args={"check_same_thread": False},
